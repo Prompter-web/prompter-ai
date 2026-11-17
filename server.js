@@ -1,4 +1,5 @@
 
+
 import express from "express";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
@@ -23,15 +24,70 @@ const ai = apiKey
 function requireAI(req, res, next) {
   if (!ai) {
     return res.status(503).json({
-      error: "Gemini is not configured. Add GEMINI_API_KEY to your .env file and restart Prompter."
+      error: "Gemini is not configured. Add GEMINI_API_KEY in Render Environment."
     });
   }
   next();
 }
 
 const clean = (value, max = 5000) =>
-  typeof value === "string" ? value.trim().slice(0, max) : "";
+  typeof value === "string"
+    ? value.trim().slice(0, max)
+    : "";
 
+function getGeminiStatus(error) {
+  const candidates = [
+    error?.status,
+    error?.code,
+    error?.response?.status,
+    error?.error?.code
+  ];
+
+  for (const value of candidates) {
+    const status = Number(value);
+    if ([503, 500, 502, 504].includes(status)) {
+      return status;
+    }
+  }
+
+  const match = String(error?.message || "")
+    .match(/"code"\s*:\s*(503|500|502|504)/);
+
+  return match ? Number(match[1]) : 0;
+}
+
+// AUTOMATIC GEMINI RETRY
+async function generateWithRetry(request) {
+  const delays = [2000, 4000, 8000];
+
+  for (let attempt = 0; attempt <= delays.length; attempt++) {
+    try {
+      return await ai.models.generateContent(request);
+    } catch (error) {
+      const status = getGeminiStatus(error);
+
+      if (![503, 500, 502, 504].includes(status)) {
+        throw error;
+      }
+
+      if (attempt === delays.length) {
+        throw error;
+      }
+
+      console.log(
+        `Gemini error ${status}. Retry ${attempt + 1}/3`
+      );
+
+      await new Promise(resolve =>
+        setTimeout(resolve, delays[attempt])
+      );
+    }
+  }
+
+  throw new Error("Gemini is temporarily unavailable.");
+}
+
+// STATUS
 app.get("/api/status", (_req, res) => {
   res.json({
     configured: Boolean(ai),
@@ -46,7 +102,8 @@ app.post("/api/prompt", requireAI, async (req, res) => {
     const description = clean(req.body.description);
     const style = clean(req.body.style, 80) || "Cinematic";
     const aspect = clean(req.body.aspect, 30) || "1:1";
-    const outputLanguage = clean(req.body.outputLanguage, 30) || "English";
+    const outputLanguage =
+      clean(req.body.outputLanguage, 30) || "English";
 
     if (description.length < 3) {
       return res.status(400).json({
@@ -76,8 +133,8 @@ Do not invent contradictory details.
 Return only the final image prompt.
 No headings or explanations.`;
 
-    const response = await ai.models.generateContent({
-      model: process.env.TEXT_MODEL || "gemini-3.8-flash",
+    const response = await generateWithRetry({
+      model: process.env.TEXT_MODEL || "gemini-2.5-flash",
       contents: `${instructions}\n\nUser description:\n${description}`
     });
 
@@ -91,8 +148,13 @@ No headings or explanations.`;
 
   } catch (error) {
     console.error("Gemini prompt error:", error);
-    res.status(500).json({
-      error: error.message || "Could not generate a prompt."
+
+    const status = getGeminiStatus(error);
+
+    res.status(status || 500).json({
+      error: status === 503
+        ? "Gemini is experiencing high demand. Please try again shortly."
+        : error.message || "Could not generate a prompt."
     });
   }
 });
@@ -141,19 +203,27 @@ app.post("/api/image", requireAI, async (req, res) => {
 
   } catch (error) {
     console.error("Gemini image error:", error);
-    res.status(500).json({
-      error: error.message || "Could not generate the image."
+
+    const status = getGeminiStatus(error);
+
+    res.status(status || 500).json({
+      error: status === 503
+        ? "Gemini image generation is experiencing high demand. Please try again."
+        : error.message || "Could not generate the image."
     });
   }
 });
 
+// WEBSITE FALLBACK
 app.use((_req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// START SERVER
 const port = Number(process.env.PORT || 3000);
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`Prompter is running at http://localhost:${port}`);
   console.log(`Gemini configured: ${Boolean(ai)}`);
 });
+
