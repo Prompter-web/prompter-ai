@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090711">
+  <meta name="description" content="Turn your imagination into powerful AI image prompts. Describe it in Hindi, English or Hinglish.">
+  <title>Prompter — Imagine it. Prompt it.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="#"><span class="brand-mark">P</span><span>prompter<span class="brand-dot">.</span></span></a>
+    <nav class="nav-links">
+      <a href="#studio">Prompt studio</a>
+      <a href="#how">How it works</a>
+    </nav>
+    <div class="top-right"><span class="status-dot"></span><span id="statusText">AI studio</span><button class="history-button" id="historyButton">History <span id="historyCount">0</span></button></div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow"><span class="sparkle">✦</span> YOUR IMAGINATION, UPGRADED <span class="eyebrow-line"></span></div>
+      <h1>Dream it.<br><span class="gradient-text">Describe it.</span> Create it.</h1>
+      <p class="hero-copy">Turn simple thoughts into extraordinary AI image prompts.<br class="desktop-only"> Hindi, English or Hinglish — just say what you imagine.</p>
+      <div class="hero-pills"><span>✦ AI prompt writer</span><span>◈ Image generation</span><span>⌘ One-click copy</span></div>
+    </section>
+
+    <section class="studio-wrap" id="studio">
+      <div class="section-heading"><div><span class="section-kicker">THE CREATIVE SPACE</span><h2>Prompt studio<span class="purple">.</span></h2></div><span class="step-label"><span>01</span> /  CREATE</span></div>
+      <div class="studio-grid">
+        <section class="panel input-panel">
+          <div class="panel-top"><div class="panel-title"><span class="panel-icon">✎</span><div><h3>Describe your imagination</h3><p>Write naturally. We'll handle the details.</p></div></div><span class="language-tag">HI · EN · HINGLISH</span></div>
+          <label class="field-label" for="description">YOUR IDEA</label>
+          <textarea id="description" maxlength="5000" placeholder="Ek futuristic city jahan purple neon lights ho, rain ho aur ek person rooftop par khada ho..."></textarea>
+          <div class="textarea-bottom"><span>Don't worry about perfect words.</span><span id="charCount">0 / 5000</span></div>
+          <div class="examples"><span class="field-label">TRY AN IDEA</span><div class="example-list">
+            <button class="example-chip" data-example="A lone astronaut exploring a glowing ancient temple on an alien planet">✧ Cosmic explorer</button>
+            <button class="example-chip" data-example="Ek anime boy sunset ke time rooftop par khada hai, cinematic orange sky">☼ Anime sunset</button>
+            <button class="example-chip" data-example="A luxury sports car on a rainy neon-lit street at midnight">◈ Neon street</button>
+          </div></div>
+          <div class="controls">
+            <div class="control-group"><label class="field-label" for="style">VISUAL STYLE</label><select id="style"><option>Cinematic</option><option>Photorealistic</option><option>Anime</option><option>3D render</option><option>Fantasy</option><option>Cyberpunk</option><option>Minimalist</option><option>Watercolor</option><option>Editorial photography</option><option>Vintage film</option></select></div>
+            <div class="control-group"><label class="field-label" for="aspect">ASPECT RATIO</label><select id="aspect"><option value="1:1">Square · 1:1</option><option value="16:9">Landscape · 16:9</option><option value="9:16">Portrait · 9:16</option><option value="4:3">Classic · 4:3</option><option value="3:2">Photo · 3:2</option></select></div>
+            <div class="control-group"><label class="field-label" for="outputLanguage">PROMPT LANGUAGE</label><select id="outputLanguage"><option>English</option><option>Hindi</option></select></div>
+          </div>
+          <button class="primary-button" id="generatePrompt"><span>✦</span> Generate professional prompt <span class="button-arrow">↗</span></button>
+          <p class="tiny-note">Your description is sent securely to the AI service to create your prompt.</p>
+        </section>
+
+        <section class="panel result-panel">
+          <div class="panel-top"><div class="panel-title"><span class="panel-icon">✧</span><div><h3>Your creation</h3><p>Your idea, transformed into a visual direction.</p></div></div><span class="result-badge">LIVE CANVAS</span></div>
+          <div class="preview-frame" id="previewFrame">
+            <div class="preview-placeholder" id="previewPlaceholder"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="placeholder-core">✦</div><span>YOUR NEXT MASTERPIECE</span><small>Your generated image will appear here</small></div>
+            <img id="generatedImage" alt="Your AI generated image" hidden>
+            <div class="image-loading" id="imageLoading" hidden><div class="loader"></div><strong>Creating your image</strong><span>Turning pixels into possibilities...</span></div>
+            <button class="download-image" id="downloadImage" hidden>↓ Download</button>
+          </div>
+          <div class="prompt-output">
+            <div class="output-heading"><span class="field-label">ENHANCED PROMPT</span><span class="word-count" id="wordCount">0 words</span></div>
+            <div id="promptText" class="prompt-text empty">Your enhanced prompt will appear here after you describe your idea.</div>
+            <div class="output-actions"><button class="secondary-button" id="copyPrompt" disabled>▢ Copy prompt</button><button class="generate-image-button" id="generateImage" disabled>✦ Generate image <span>↗</span></button></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="how-section" id="how"><div class="section-heading"><div><span class="section-kicker">SIMPLE BY DESIGN</span><h2>From thought to <span class="gradient-text">visual.</span></h2></div></div><div class="how-grid">
+      <article class="how-card"><span class="how-number">01</span><div class="how-icon">✎</div><h3>Say what you see</h3><p>Describe your idea in Hindi, English or Hinglish. No prompt-writing skills needed.</p></article>
+      <article class="how-card"><span class="how-number">02</span><div class="how-icon">✧</div><h3>AI makes it vivid</h3><p>Prompter adds composition, lighting, atmosphere, camera details and style.</p></article>
+      <article class="how-card"><span class="how-number">03</span><div class="how-icon">◈</div><h3>Bring it to life</h3><p>Generate an image, copy your prompt and save your creation.</p></article>
+    </div></section>
+  </main>
+
+  <footer><a class="brand footer-brand" href="#"><span class="brand-mark">P</span><span>prompter<span class="brand-dot">.</span></span></a><span>Made for the imagination. <span class="footer-spark">✦</span></span><span>© 2026 PROMPTER</span></footer>
+
+  <div class="toast" id="toast" role="status"></div>
+  <div class="history-overlay" id="historyOverlay" hidden><div class="history-drawer"><div class="drawer-head"><div><span class="section-kicker">YOUR WORKSPACE</span><h2>Prompt history</h2></div><button id="closeHistory" class="close-button" aria-label="Close history">×</button></div><div id="historyList" class="history-list"></div><button class="clear-history" id="clearHistory">Clear history</button></div></div>
+  <script src="/app.js"></script>
+</body>
+</html>
